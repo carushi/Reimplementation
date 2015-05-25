@@ -2,8 +2,8 @@ package main
 
 import (
 	"fmt"
-	"strconv"
 	"os"
+	"strconv"
 )
 
 func LinearSieve(n int) []int {
@@ -37,5 +37,5 @@ func main() {
 	if num < 2 {
 		return
 	}
-    fmt.Println(LinearSieve(num))
+	fmt.Println(LinearSieve(num))
 }
