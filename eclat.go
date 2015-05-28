@@ -1,3 +1,4 @@
+// This implementation is following an eclat python script found here http://adrem.ua.ac.be/~goethals/software/.
 package main
 
 import (
@@ -10,22 +11,24 @@ import (
 	"strings"
 )
 
+// window is the initial capacity of transaction list in Itemset.
 const window = 10
 
+// Itemset is a map of int keys for item and []int values for transaction lists.
 type Itemset map[int][]int
 
-type Pair struct {
+type pair struct {
 	Key, Num int
 }
-type Pairlist []Pair
+type pairlist []pair
 
-func (a Pairlist) Len() int {
+func (a pairlist) Len() int {
 	return len(a)
 }
-func (a Pairlist) Swap(i, j int) {
+func (a pairlist) Swap(i, j int) {
 	a[i], a[j] = a[j], a[i]
 }
-func (a Pairlist) Less(i, j int) bool {
+func (a pairlist) Less(i, j int) bool {
 	return a[i].Num < a[j].Num
 }
 
@@ -49,20 +52,35 @@ func getCommonSet(left []int, right []int) []int {
 	}
 	return list
 }
+
+func printSet(isup int, prefix []int) {
+	sort.Ints(prefix)
+	fmt.Printf("[")
+	for i, m := range prefix {
+		if i == len(prefix)-1 {
+			fmt.Printf("'%d'] :", m)
+		} else {
+			fmt.Printf("'%d', ", m)
+		}
+	}
+	fmt.Printf(" %d\n", isup)
+}
+
+// Eclat outputs all itemsets whose support number is equal or greater than minsup.
+// Format: ['item1', 'item2', ...] : support number
 func Eclat(minsup int, prefix []int, is *Itemset) error {
 	var err error
-	list := make(Pairlist, 0)
+	list := make(pairlist, 0)
 	for key, value := range *is {
-		list = append(list, Pair{key, len(value)})
+		list = append(list, pair{key, len(value)})
 	}
 	sort.Sort(sort.Reverse(list))
 	for i, p := range list {
-		isupp := len((*is)[p.Key])
-		if isupp < minsup {
+		isup := len((*is)[p.Key])
+		if isup < minsup {
 			break
 		}
-		fmt.Printf("%d:", minsup)
-		fmt.Println(append(prefix, p.Key))
+		printSet(isup, append(prefix, p.Key))
 		suffix := make(Itemset, 0)
 		for _, pp := range list[i+1 : len(list)] {
 			comlist := getCommonSet((*is)[p.Key], (*is)[pp.Key])
@@ -98,7 +116,6 @@ func scanTransaction(ifile string, is *Itemset) error {
 			(*is)[item] = append((*is)[item], trans)
 		}
 	}
-	fmt.Println(*is)
 	return scanner.Err()
 }
 
